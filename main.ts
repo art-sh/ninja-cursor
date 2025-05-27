@@ -60,6 +60,12 @@ class NinjaCursorForWindow {
 					if (!cursorVisibility) {
 						cursorVisibility = true;
 					}
+				} else if (document.activeElement instanceof HTMLElement) {
+					datumElement = document.activeElement;
+					
+					if (!cursorVisibility) {
+						cursorVisibility = true;
+					}
 				} else if (e != null) {
 					// If it caused by clicking an element but it is not editable.
 					if (cursorVisibility) {
@@ -165,7 +171,7 @@ class NinjaCursorForWindow {
 			registerDomEvent(aw, event, (ev: Event) => {
 				moveCursor(ev);
 
-				if (event === 'mousedown') {
+				if (event === 'mousedown' || event === 'touchend') {
 					setTimeout(() => {
 						moveCursor(ev, true);
 					}, 150)
@@ -189,8 +195,28 @@ class NinjaCursorForWindow {
 				}
 				
 				moveCursor(undefined, true);
+				
+				setTimeout(() => {
+					moveCursor(undefined, true);
+				}, 500);
 			});
 		}));
+
+		registerDomEvent(aw, "resize", () => {
+			moveCursor(undefined, true);
+		});
+
+		registerDomEvent(ad, "focusin", (e: FocusEvent) => {
+			if (this.wrapperElement) {
+				this.wrapperElement.style.setProperty("--cursor-visibility", "visible");
+			}
+		});
+
+		registerDomEvent(ad, "focusout", (e: FocusEvent) => {
+			if (this.wrapperElement) {
+				this.wrapperElement.style.setProperty("--cursor-visibility", "hidden");
+			}
+		});
 
 		let triggered = false;
 		// Handles scroll till scroll is finish.

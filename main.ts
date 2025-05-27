@@ -164,8 +164,34 @@ class NinjaCursorForWindow {
 		for (const event of eventNames) {
 			registerDomEvent(aw, event, (ev: Event) => {
 				moveCursor(ev);
+
+				if (event === 'mousedown') {
+					setTimeout(() => {
+						moveCursor(ev, true);
+					}, 150)
+				}
 			});
 		}
+
+		// For prevent error
+		let firstTime = false;
+		plugin.registerEvent(plugin.app.workspace.on("active-leaf-change", () => {
+			if (!firstTime) {
+				firstTime = true;
+				return;
+			}
+
+			requestAnimationFrame(() => {
+				const activeElement = document.activeElement as HTMLElement;
+				
+				if (activeElement) {
+					activeElement.focus();
+				}
+				
+				moveCursor(undefined, true);
+			});
+		}));
+
 		let triggered = false;
 		// Handles scroll till scroll is finish.
 		const applyWheelScroll = (last?: number | boolean) => {
@@ -205,8 +231,6 @@ class NinjaCursorForWindow {
 			}
 		}
 	}
-
-
 }
 export default class NinjaCursorPlugin extends Plugin {
 
